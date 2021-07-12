@@ -96,14 +96,17 @@ def parse_lk_platform(lk : io.BufferedReader) -> str:
     :param lk: The image to be parsed.
     :return: The platform.
     """
+    OFFSETS = []
     CMDLINE = parse_lk_cmdline(lk)
-    OFFSET = lk.read().find(b'platform/')
-    lk.seek(OFFSET + len(b'platform/'))
-   
-    if CMDLINE.find("androidboot.hardware") != -1:
-        PLATFORM = CMDLINE[CMDLINE.find('androidboot.hardware') + len('androidboot.hardware=') :len(CMDLINE)].upper()
-    else:
-        PLATFORM = lk.read(6).decode("utf-8").upper()
+
+    lk.seek(0)
+    data = lk.read()
+
+    for m in re.finditer(b'platform/', data):
+        OFFSETS.append(m.start())
+
+    lk.seek(OFFSETS[1] + len(b'platform/'))
+    PLATFORM = lk.read(6).decode("utf-8").upper()
     
     lk.seek(0)
     return PLATFORM
@@ -149,12 +152,12 @@ def parse_lk_oem_commands(lk : io.BufferedReader) -> list[str]:
         OEM_OFFSETS.append(m.start())
 
     for offset in OEM_OFFSETS:
-        TMP_COMMANDS.append(data[offset:offset+3+100]) # offset, b'oem' length, inaccurate string length (fixme)
+        TMP_COMMANDS.append(data[offset:offset+3+500]) # offset, b'oem' length, inaccurate string length (fixme)
 
     for word in str(TMP_COMMANDS).split("oem "):
         param = ''
         for char in word:
-            if char in ("\\", "[", "'", "\n", " ", ")", "("):
+            if char in ("\\", "[", "'", "\n", " ", ")", "(", ":"):
                 break
             param += char
 
