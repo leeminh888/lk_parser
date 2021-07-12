@@ -30,12 +30,10 @@ import subprocess
 import struct
 
 HEADER_SEQ = b'\x88\x16\x88X'
-
-# // Inaccurate offsets // #
 STRING_LENGTH = 50
 LINE_OFFSET = 50
 
-def parse_lk_platform(lk):
+def parse_lk_platform(lk : io.BufferedReader) -> str:
     """
     Reads and parses the platform from the provided LK image.
     :param lk: The image to be parsed.
@@ -53,7 +51,7 @@ def parse_lk_platform(lk):
     lk.seek(0)
     return PLATFORM
 
-def parse_lk_cmdline(lk):
+def parse_lk_cmdline(lk : io.BufferedReader) -> str:
     """
     Reads and parses the boot command line ("cmdline") from the provided LK image.
     :param lk: The image to be parsed.
@@ -77,7 +75,7 @@ def parse_lk_cmdline(lk):
     lk.seek(0)
     return CMDLINE
     
-def parse_lk_oem_commands(lk):
+def parse_lk_oem_commands(lk : io.BufferedReader) -> list[str]:
     """
     Reads and parses all the "oem command" commands from the provided LK image.
     :param lk: The image to be parsed.
@@ -98,6 +96,7 @@ def parse_lk_oem_commands(lk):
                 TMP_COMMANDS.append(line.decode("utf-8")[offset:offset+3+STRING_LENGTH]) # offset, b'oem' length, STRING_LENGTH
             except Exception:
                 TMP_COMMANDS.append(str(line)[offset:offset+3+STRING_LENGTH]) # offset, b'oem' length, STRING_LENGTH
+        
         line = lk.read(LINE_OFFSET)
 
     for word in str(TMP_COMMANDS).split("oem "):
@@ -130,26 +129,26 @@ def main():
         print(f"[-] Couldn't open '{lk_bin_file}'.")
         sys.exit(1)
 
-    fp = open(lk_bin_file, "rb")
-    if fp.read(4) != HEADER_SEQ:
-        print(f"[-] Invalid LK image.")
-        sys.exit(1)
+    with open(lk_bin_file, "rb") as fp:
+        if fp.read(4) != HEADER_SEQ:
+            print(f"[-] Invalid LK image.")
+            sys.exit(1)
 
-    HEADER_FILE_SIZE = struct.unpack("<I", fp.read(4))[0]
-    print(f"[?] Image size (from header) = {HEADER_FILE_SIZE} bytes")
-    
-    IMAGE_NAME = fp.read(8).decode("utf-8")
-    print(f"[?] Image name (from header) = {IMAGE_NAME}")
+        HEADER_FILE_SIZE = struct.unpack("<I", fp.read(4))[0]
+        print(f"[?] Image size (from header) = {HEADER_FILE_SIZE} bytes")
+        
+        IMAGE_NAME = fp.read(8).decode("utf-8")
+        print(f"[?] Image name (from header) = {IMAGE_NAME}")
 
-    CMDLINE = parse_lk_cmdline(fp)
-    print(f"[?] Command Line: {CMDLINE}")
+        CMDLINE = parse_lk_cmdline(fp)
+        print(f"[?] Command Line: {CMDLINE}")
 
-    print(f"[?] Platform: {parse_lk_platform(fp)}")
-    
-    NEEDS_UNLOCK_CODE = fp.read().find(b'unlock code') != -1
-    print(f"[?] Needs unlock code: {NEEDS_UNLOCK_CODE}")
-    
-    print(f"[?] Available OEM commands: {parse_lk_oem_commands(fp)}")
+        print(f"[?] Platform: {parse_lk_platform(fp)}")
+        
+        NEEDS_UNLOCK_CODE = (fp.read().find(b'unlock code') != -1)
+        print(f"[?] Needs unlock code: {NEEDS_UNLOCK_CODE}")
+        
+        print(f"[?] Available OEM commands: {parse_lk_oem_commands(fp)}")
 
 if __name__ == "__main__":
     main()
