@@ -58,6 +58,30 @@ def parse_lk_product(lk : io.BufferedReader) -> str:
     lk.seek(0)
     return PRODUCT
 
+def parse_lk_version(lk : io.BufferedReader) -> str:
+    """
+    Reads and parses the LK version from the provided LK image.
+    :param lk: The image to be parsed.
+    :return: The LK version.
+    """
+    I = 0
+    lk.seek(0)
+    OFFSET = lk.read().find(b'getvar:')
+
+    if OFFSET == -1:
+        return "N/A"
+
+    lk.seek(OFFSET + len(b'getvar:') + 9)
+
+    while lk.read(1) != b'\x00':
+        I += 1
+
+    lk.seek(OFFSET + len(b'getvar:') + 9)
+    VERSION = lk.read(I).decode("utf-8")
+
+    lk.seek(0)
+    return VERSION
+
 def parse_lk_platform(lk : io.BufferedReader) -> str:
     """
     Reads and parses the platform from the provided LK image.
@@ -159,6 +183,8 @@ def main():
 
         IMAGE_NAME = fp.read(8).decode("utf-8")
         print(f"[?] Image name (from header) = {IMAGE_NAME}")
+
+        print(f"[?] LK version: {parse_lk_version(fp)}")
 
         CMDLINE = parse_lk_cmdline(fp)
         print(f"[?] Command Line: {CMDLINE}")
