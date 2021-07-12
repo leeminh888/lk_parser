@@ -55,6 +55,9 @@ def parse_lk_product(lk : io.BufferedReader) -> str:
     lk.seek(OFFSET + len(b'product') + 1)
     PRODUCT = lk.read(I).decode("utf-8")
 
+    if "FASTBOOT" in PRODUCT:
+        PRODUCT = "N/A"
+
     lk.seek(0)
     return PRODUCT
 
@@ -78,6 +81,11 @@ def parse_lk_version(lk : io.BufferedReader) -> str:
 
     lk.seek(OFFSET + len(b'getvar:') + 9)
     VERSION = lk.read(I).decode("utf-8")
+
+    try:
+        float(VERSION)
+    except Exception:
+        VERSION = "N/A"
 
     lk.seek(0)
     return VERSION
