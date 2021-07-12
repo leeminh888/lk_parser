@@ -34,6 +34,30 @@ HEADER_SEQ = b'\x88\x16\x88X'
 if sys.version_info[1] < 9:
     raise RuntimeError("[!] Python 3.9+ is required.")
 
+def parse_lk_product(lk : io.BufferedReader) -> str:
+    """
+    Reads and parses the product name from the provided LK image.
+    :param lk: The image to be parsed.
+    :return: The product name.
+    """
+    I = 0
+    lk.seek(0)
+    OFFSET = lk.read().find(b'product')
+
+    if OFFSET == -1:
+        return "N/A"
+
+    lk.seek(OFFSET + len(b'product') + 1)
+
+    while lk.read(1) != b'\x00':
+        I += 1
+
+    lk.seek(OFFSET + len(b'product') + 1)
+    PRODUCT = lk.read(I).decode("utf-8")
+
+    lk.seek(0)
+    return PRODUCT
+
 def parse_lk_platform(lk : io.BufferedReader) -> str:
     """
     Reads and parses the platform from the provided LK image.
@@ -140,6 +164,7 @@ def main():
         print(f"[?] Command Line: {CMDLINE}")
 
         print(f"[?] Platform: {parse_lk_platform(fp)}")
+        print(f"[?] Product: {parse_lk_product(fp)}")
         
         NEEDS_UNLOCK_CODE = (fp.read().find(b'unlock code') != -1)
         print(f"[?] Needs unlock code: {NEEDS_UNLOCK_CODE}")
