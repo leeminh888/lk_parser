@@ -107,6 +107,9 @@ def parse_lk_platform(lk : io.BufferedReader) -> str:
 
     lk.seek(OFFSETS[1] + len(b'platform/'))
     PLATFORM = lk.read(6).decode("utf-8").upper()
+    if "MEDIA" in PLATFORM:
+        lk.seek(OFFSETS[1] + len(b'platform/') + 9)
+        PLATFORM = lk.read(6).decode("utf-8").upper()
     
     lk.seek(0)
     return PLATFORM
