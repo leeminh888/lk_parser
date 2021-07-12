@@ -19,12 +19,15 @@ This is a simple example on a Linux system:
 ```
 r0rt1z2@r0rt1z2: /lk_parser$ python3 lk_parser.py lk.bin
 
-[?] Image size (from header) = 485476 bytes
-[?] Image name (from header) = LK
-[?] Command Line: console=tty0 console=ttyS0,921600n1 console=ttyMT3,921600n1 earlycon=uart8250,mmio32,0x11002000 root=/dev/ram vmalloc=496M androidboot.hardware=mt8163
-[?] Platform: MT8163
-[?] Needs unlock code: True
-[?] Available OEM commands: ['fastboot oem idme', 'fastboot oem relock', 'fastboot oem flags', 'fastboot oem p2u', 'fastboot oem off-mode-charge']
+[?] Image size (from header): 286424 bytes
+[?] Image name (from header): lk
+[?] LK version: 0.5
+[?] Command Line: console=tty0 console=ttyMT3,921600n1 root=/dev/ram vmalloc=496M androidboot.hardware=mt6580
+[?] Platform: MT6580
+[?] Product: D5270_ARCHOS_E1
+[?] Needs unlock code: False
+[?] Uses verified boot: True
+[?] Available OEM commands: ['fastboot oem p2u', 'fastboot oem reboot-recovery', 'fastboot oem append-cmdline', 'fastboot oem off-mode-charge', 'fastboot oem unlock', 'fastboot oem lock', 'fastboot oem key', 'fastboot oem lks', 'fastboot oem ap_jtag']
 
 r0rt1z2@r0rt1z2: /lk_parser$
 ```
