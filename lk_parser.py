@@ -179,10 +179,10 @@ def main():
             sys.exit(1)
 
         HEADER_FILE_SIZE = struct.unpack("<I", fp.read(4))[0]
-        print(f"[?] Image size (from header) = {HEADER_FILE_SIZE} bytes")
+        print(f"[?] Image size (from header): {HEADER_FILE_SIZE} bytes")
 
         IMAGE_NAME = fp.read(8).decode("utf-8")
-        print(f"[?] Image name (from header) = {IMAGE_NAME}")
+        print(f"[?] Image name (from header): {IMAGE_NAME}")
 
         print(f"[?] LK version: {parse_lk_version(fp)}")
 
