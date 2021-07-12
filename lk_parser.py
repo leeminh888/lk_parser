@@ -30,8 +30,6 @@ import subprocess
 import struct
 
 HEADER_SEQ = b'\x88\x16\x88X'
-STRING_LENGTH = 50
-LINE_OFFSET = 50
 
 if sys.version_info[1] < 9:
     raise RuntimeError("[!] Python 3.9+ is required.")
@@ -84,23 +82,18 @@ def parse_lk_oem_commands(lk : io.BufferedReader) -> list[str]:
     :param lk: The image to be parsed.
     :return: List with all oem commands.
     """
+    OEM_OFFSETS = []
     TMP_COMMANDS = []
     FINAL_COMMANDS = []
     
     lk.seek(0)
-    line = lk.read(LINE_OFFSET)
+    data = lk.read()
 
-    while True:
-        if not line:
-            break
-        if b'oem ' in line:
-            offset = line.find(b'oem ')
-            try:
-                TMP_COMMANDS.append(line.decode("utf-8")[offset:offset+3+STRING_LENGTH]) # offset, b'oem' length, STRING_LENGTH
-            except Exception:
-                TMP_COMMANDS.append(str(line)[offset:offset+3+STRING_LENGTH]) # offset, b'oem' length, STRING_LENGTH
-        
-        line = lk.read(LINE_OFFSET)
+    for m in re.finditer(b'oem ', data):
+        OEM_OFFSETS.append(m.start())
+
+    for offset in OEM_OFFSETS:
+        TMP_COMMANDS.append(data[offset:offset+3+100]) # offset, b'oem' length, inaccurate string length (fixme)
 
     for word in str(TMP_COMMANDS).split("oem "):
         param = ''
@@ -108,7 +101,7 @@ def parse_lk_oem_commands(lk : io.BufferedReader) -> list[str]:
             if char in ("\\", "[", "'", "\n", " ", ")", "("):
                 break
             param += char
-                
+
         if param:
             FINAL_COMMANDS.append(f"fastboot oem {param}")
     
@@ -139,7 +132,7 @@ def main():
 
         HEADER_FILE_SIZE = struct.unpack("<I", fp.read(4))[0]
         print(f"[?] Image size (from header) = {HEADER_FILE_SIZE} bytes")
-        
+
         IMAGE_NAME = fp.read(8).decode("utf-8")
         print(f"[?] Image name (from header) = {IMAGE_NAME}")
 
