@@ -143,6 +143,11 @@ def main():
         
         NEEDS_UNLOCK_CODE = (fp.read().find(b'unlock code') != -1)
         print(f"[?] Needs unlock code: {NEEDS_UNLOCK_CODE}")
+        fp.seek(0)
+
+        USES_VERIFIED_BOOT = (fp.read().find(b'verified boot') != 1)
+        print(f"[?] Uses verified boot: {USES_VERIFIED_BOOT}")
+        fp.seek(0)
         
         print(f"[?] Available OEM commands: {parse_lk_oem_commands(fp)}")
 
