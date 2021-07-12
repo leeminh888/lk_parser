@@ -105,7 +105,7 @@ def parse_lk_oem_commands(lk : io.BufferedReader) -> list[str]:
     for word in str(TMP_COMMANDS).split("oem "):
         param = ''
         for char in word:
-            if char in ("\\", "[", "'", "\n", " ", ""):
+            if char in ("\\", "[", "'", "\n", " ", ")", "("):
                 break
             param += char
                 
