@@ -33,6 +33,9 @@ HEADER_SEQ = b'\x88\x16\x88X'
 STRING_LENGTH = 50
 LINE_OFFSET = 50
 
+if sys.version_info[1] < 9:
+    raise RuntimeError("[!] Python 3.9+ is required.")
+
 def parse_lk_platform(lk : io.BufferedReader) -> str:
     """
     Reads and parses the platform from the provided LK image.
